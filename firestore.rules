@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /users/{uid} {
+      allow read: if isSignedIn() && (uid == request.auth.uid || isAdmin());
+      allow create: if isSignedIn(); // student sign-up creates own doc
+      allow update: if uid == request.auth.uid || isAdmin();
+    }
+
+    match /units/{id} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /tests/{id} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /results/{id} {
+      allow create: if isSignedIn();
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == resource.data.studentId);
+    }
+
+    match /notes/{id} {
+      // create uses request.resource (data not yet written); reads use resource
+      allow create: if isSignedIn() && request.resource.data.studentId == request.auth.uid;
+      allow read, update, delete: if isSignedIn() && resource.data.studentId == request.auth.uid;
+    }
+  }
+}
