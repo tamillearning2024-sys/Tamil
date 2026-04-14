@@ -164,4 +164,5 @@ This project is licensed under the **MIT License**.
 ## 💡 Quote
 
 > "கற்றதனால் ஆய பயனென்கொல் வாலறிவன்
-> நற்றாள் தொழாஅர் எனின்"
+
+>  நற்றாள் தொழாஅர் எனின்"
